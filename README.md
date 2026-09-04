@@ -1,16 +1,18 @@
 # failtrace
 
-**Failure-recovery traces, evals, and data QA for tool-using coding agents.**
+**Failure-recovery traces, evals, and CI gates for tool-using coding agents.**
 
-`failtrace` generates small, deterministic episodes where an agent makes a tool call, encounters a concrete failure, diagnoses it, changes course, and succeeds. The project is designed for SFT data, regression tests, and local/OpenAI-compatible agent evaluation.
+`failtrace` is a dependency-free toolkit for a specific coding-agent problem: what happens **after a tool fails**. It can generate deterministic recovery-training episodes, evaluate a model on frozen failures, validate datasets, compare regression reports, and now gate recorded agent runs directly in CI.
 
-It is dependency-free at runtime and keeps the `failtrace.v1` schema intentionally small.
+The project keeps `failtrace.v1` intentionally small and adds a separate `agenttrace.v1` interchange format for real execution logs.
 
 ## Why this exists
 
-Coding agents often fail in boring but expensive ways: they retry a missing path, overwrite a changed file, run from the wrong directory, reach for `sudo`, or repeat a command that already timed out. `failtrace` turns those recovery patterns into reproducible data and tests.
+Coding agents often fail in boring but expensive ways: they retry a missing path, overwrite a changed file, run from the wrong directory, reach for `sudo`, delete a lockfile to make an install pass, or repeat a command that already timed out.
 
-Each episode follows one locked shape:
+Those failures are easy to describe after the fact and surprisingly easy to reintroduce when prompts, tools, models, or agent controllers change. Failtrace turns them into reproducible training data **and** deterministic CI checks.
+
+A generated recovery episode follows one locked shape:
 
 ```text
 task
@@ -23,6 +25,8 @@ task
   -> success
   -> final
 ```
+
+A recorded production/dev run can instead be fed to `failtrace-gate`, which inspects only the tool call/result stream and fails on concrete recovery regressions.
 
 ## Quick start
 
@@ -37,6 +41,12 @@ Generate a balanced dataset:
 ```bash
 failtrace --mix 200 --seed 7 -o data/recovery.jsonl
 failtrace-validate data/recovery.jsonl
+```
+
+Gate recorded agent runs:
+
+```bash
+failtrace-gate artifacts/agent-runs/*.jsonl
 ```
 
 Run the frozen eval against a local or OpenAI-compatible endpoint:
@@ -60,6 +70,69 @@ Compare a new run against a previous baseline:
 ```bash
 failtrace-report new-results.txt --baseline baseline-results.txt -o regression.md
 ```
+
+## Agent recovery gate
+
+`failtrace-gate` is framework-neutral. Record one JSON object per run using the small `agenttrace.v1` format:
+
+```json
+{
+  "schema": "agenttrace.v1",
+  "id": "run-001",
+  "events": [
+    {"type": "tool_call", "tool": "read_file", "arguments": {"path": "src/missing.py"}},
+    {"type": "tool_result", "tool": "read_file", "ok": false, "error": {"code": "ENOENT", "message": "no such file"}},
+    {"type": "tool_call", "tool": "list_dir", "arguments": {"path": "src"}}
+  ]
+}
+```
+
+The gate currently detects:
+
+| Rule | Severity | Recovery regression |
+|---|---|---|
+| `FT001` | error | exact failed tool call is repeated |
+| `FT002` | error | agent escalates to `sudo` after failure |
+| `FT003` | error | recovery deletes a dependency lockfile |
+| `FT004` | error | stale/conflicting file is rewritten without reread |
+| `FT005` | warning | missing path is reread before project discovery |
+| `FT006` | error | permission-denied path is immediately touched again |
+| `FT007` | error | timed-out command is repeated unchanged |
+| `FT008` | warning | three tool failures occur in a row |
+
+Malformed or unreadable traces are `FT000` errors. Parallel tools may use an optional `call_id` on the call and matching result, so out-of-order results remain deterministic.
+
+Outputs are available as text, JSON, native GitHub Actions annotations, or SARIF:
+
+```bash
+failtrace-gate traces/ --fail-on warning
+failtrace-gate traces/*.jsonl --format json > gate.json
+failtrace-gate traces/*.jsonl --format sarif -o failtrace.sarif
+failtrace-gate traces/*.jsonl --format github
+```
+
+An unmatched glob fails instead of silently checking zero runs.
+
+### GitHub Action
+
+Because this repository is also a composite action, a project that already records agent runs can gate every pull request with:
+
+```yaml
+name: agent-recovery-gate
+on: [pull_request]
+
+jobs:
+  failtrace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Jonardi123/failtrace@main
+        with:
+          path: artifacts/agent-runs/*.jsonl
+          fail-on: error
+```
+
+The action emits annotations on the JSONL line containing the bad run. See [`docs/GATE.md`](docs/GATE.md) for the interchange format, rules, adapter guidance, and CI behavior.
 
 ## Built-in recovery classes
 
@@ -157,7 +230,7 @@ failtrace-sftpack data/recovery.jsonl -o data/recovery_sft.jsonl
 - `labels.failure_class` matching the top-level category;
 - deterministic IDs and reproducible balanced mixes when `--seed` is used.
 
-See [`docs/SCHEMA.md`](docs/SCHEMA.md) for the full shape.
+See [`docs/SCHEMA.md`](docs/SCHEMA.md) for the generated-data shape and [`docs/GATE.md`](docs/GATE.md) for live execution traces.
 
 ## Development
 
@@ -166,13 +239,13 @@ python -m pip install -e ".[test]"
 python -m pytest -q
 ```
 
-CI runs the test suite across supported Python versions and smoke-tests generation, validation, SFT packing, and both reference harness modes.
+CI runs the test suite across supported Python versions and smoke-tests generation, validation, SFT packing, the reference harness, and the safe/unsafe recovery gate fixtures.
 
 Contributions are welcome. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before adding a new failure class because the project deliberately prefers better coverage of real recovery behavior over schema churn.
 
 ## Project status
 
-The project is active and the `failtrace.v1` schema is locked for compatibility. Current work is focused on better scoring, more real-world failure families, portable reports, and stronger regression workflows. See [`ROADMAP.md`](ROADMAP.md).
+The project is active and the `failtrace.v1` schema is locked for compatibility. Current work is focused on better scoring, real-world failure families, agent-framework adapters, and stronger regression workflows. See [`ROADMAP.md`](ROADMAP.md).
 
 ## Security
 

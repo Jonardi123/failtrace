@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "failtrace"
-version = "0.2.0"
-description = "Failure-recovery traces, evals, and data QA for tool-using coding agents"
+version = "0.3.0"
+description = "Failure-recovery traces, evals, and CI gates for tool-using coding agents"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [{name = "Jonardi123"}]
-keywords = ["agents", "evaluation", "tool-use", "sft", "datasets", "coding-agents"]
+keywords = ["agents", "evaluation", "tool-use", "sft", "datasets", "coding-agents", "ci", "sarif"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -32,6 +32,7 @@ failtrace-harness = "harness:main"
 failtrace-sftpack = "sftpack:main"
 failtrace-validate = "failtrace_validate:main"
 failtrace-report = "failtrace_report:main"
+failtrace-gate = "failtrace_gate:main"
 
 [project.urls]
 Homepage = "https://github.com/Jonardi123/failtrace"
@@ -48,6 +49,10 @@ py-modules = [
   "sftpack",
   "failtrace_validate",
   "failtrace_report",
+  "failtrace_gate",
+  "gate_schema",
+  "gate_rules",
+  "gate_report",
 ]
 
 [tool.pytest.ini_options]

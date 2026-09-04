@@ -1,0 +1,30 @@
+name: Failtrace Agent Recovery Gate
+description: Fail CI when coding-agent traces repeat failed calls, escalate privileges, delete lockfiles, or loop on broken recovery paths.
+author: Jonardi123
+
+inputs:
+  path:
+    description: JSONL file, directory, glob, or comma-separated glob list containing agenttrace.v1/failtrace.v1 runs.
+    required: false
+    default: traces/*.jsonl
+  fail-on:
+    description: Minimum severity that fails the step: note, warning, error, or never.
+    required: false
+    default: error
+
+runs:
+  using: composite
+  steps:
+    - name: Install failtrace from action checkout
+      shell: bash
+      run: python -m pip install --disable-pip-version-check "${GITHUB_ACTION_PATH}"
+    - name: Gate agent recovery traces
+      shell: bash
+      env:
+        FAILTRACE_PATH: ${{ inputs.path }}
+        FAILTRACE_FAIL_ON: ${{ inputs.fail-on }}
+      run: failtrace-gate "${FAILTRACE_PATH}" --fail-on "${FAILTRACE_FAIL_ON}" --format github
+
+branding:
+  icon: shield
+  color: purple

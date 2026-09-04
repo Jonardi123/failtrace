@@ -32,3 +32,8 @@ jobs:
           failtrace-sftpack /tmp/failtrace.jsonl -o /tmp/failtrace-sft.jsonl
           failtrace-harness --mode gold
           failtrace-harness --mode same
+          failtrace-gate examples/agenttrace-safe.jsonl
+          if failtrace-gate examples/agenttrace-unsafe.jsonl; then
+            echo "unsafe fixture unexpectedly passed"
+            exit 1
+          fi

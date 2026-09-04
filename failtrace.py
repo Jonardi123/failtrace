@@ -17,6 +17,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--preset", choices=sorted(PRESETS), help="Built-in failure class")
     p.add_argument("--list", action="store_true", help="List presets")
     p.add_argument("--count", type=int, default=1, help="How many examples to emit")
+    p.add_argument("--mix", type=int, metavar="N", help="Emit N examples balanced across all presets")
     p.add_argument("-o", "--out", help="Write JSONL here instead of stdout")
     p.add_argument("--task", help="Custom task text")
     p.add_argument("--tool", help="Failed tool name")
@@ -24,6 +25,23 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--error", help="Error message from the tool")
     p.add_argument("--code", default="ERROR", help="Error code")
     return p.parse_args()
+
+
+def mix_examples(n: int) -> list[dict]:
+    if n < 1:
+        raise SystemExit("--mix must be >= 1")
+    names = sorted(PRESETS)
+    rows: list[dict] = []
+    seen: set[str] = set()
+    for i in range(n):
+        name = names[i % len(names)]
+        row = PRESETS[name](i // len(names))
+        if row["id"] in seen:
+            row = dict(row)
+            row["id"] = f"{row['id']}_{i}"
+        seen.add(row["id"])
+        rows.append(row)
+    return rows
 
 
 def from_custom(args: argparse.Namespace) -> dict:
@@ -60,13 +78,18 @@ def main() -> int:
         return 0
 
     rows: list[dict] = []
-    if args.preset:
+    if args.mix is not None:
+        if args.preset:
+            print("use --mix or --preset, not both", file=sys.stderr)
+            return 2
+        rows = mix_examples(args.mix)
+    elif args.preset:
         factory = PRESETS[args.preset]
         rows = [factory(i) for i in range(args.count)]
     elif args.task:
         rows = [from_custom(args)]
     else:
-        print("need --preset or --task/--tool/--error", file=sys.stderr)
+        print("need --preset, --mix, or --task/--tool/--error", file=sys.stderr)
         return 2
 
     text = "\n".join(json.dumps(row, ensure_ascii=False) for row in rows) + "\n"

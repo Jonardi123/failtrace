@@ -284,5 +284,51 @@ class VarietyTests(unittest.TestCase):
         self.assertEqual(len({row["task"] for row in rows}), 20)
 
 
+class MixTests(unittest.TestCase):
+    def test_mix_emits_n_valid_jsonl_rows(self) -> None:
+        result = cli("--mix", "20")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rows = parse_jsonl(result.stdout)
+        self.assertEqual(len(rows), 20)
+        for row in rows:
+            assert_valid_v1(self, row)
+
+    def test_mix_is_balanced_across_presets(self) -> None:
+        n = 20
+        result = cli("--mix", str(n))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rows = parse_jsonl(result.stdout)
+        counts: dict[str, int] = {}
+        for row in rows:
+            counts[row["category"]] = counts.get(row["category"], 0) + 1
+        self.assertEqual(set(counts), set(PRESETS))
+        values = list(counts.values())
+        self.assertLessEqual(max(values) - min(values), 1)
+        self.assertEqual(sum(values), n)
+
+    def test_mix_ids_are_unique(self) -> None:
+        result = cli("--mix", "24")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rows = parse_jsonl(result.stdout)
+        ids = [row["id"] for row in rows]
+        self.assertEqual(len(ids), len(set(ids)))
+
+    def test_mix_writes_jsonl_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "mix.jsonl"
+            result = cli("--mix", "8", "-o", str(path))
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(path.exists())
+            rows = parse_jsonl(path.read_text(encoding="utf-8"))
+            self.assertEqual(len(rows), 8)
+            self.assertEqual({row["category"] for row in rows}, set(PRESETS))
+            for row in rows:
+                assert_valid_v1(self, row)
+
+    def test_mix_rejects_preset(self) -> None:
+        result = cli("--mix", "4", "--preset", "timeout")
+        self.assertEqual(result.returncode, 2)
+
+
 if __name__ == "__main__":
     unittest.main()

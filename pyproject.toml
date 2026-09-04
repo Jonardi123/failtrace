@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "failtrace"
+version = "0.2.0"
+description = "Failure-recovery traces, evals, and data QA for tool-using coding agents"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Jonardi123"}]
+keywords = ["agents", "evaluation", "tool-use", "sft", "datasets", "coding-agents"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Testing",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<9"]
+
+[project.scripts]
+failtrace = "failtrace:main"
+failtrace-harness = "harness:main"
+failtrace-sftpack = "sftpack:main"
+failtrace-validate = "failtrace_validate:main"
+failtrace-report = "failtrace_report:main"
+
+[project.urls]
+Homepage = "https://github.com/Jonardi123/failtrace"
+Issues = "https://github.com/Jonardi123/failtrace/issues"
+Source = "https://github.com/Jonardi123/failtrace"
+
+[tool.setuptools]
+py-modules = [
+  "failtrace",
+  "presets",
+  "schema",
+  "notool_preset",
+  "harness",
+  "sftpack",
+  "failtrace_validate",
+  "failtrace_report",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["test_failtrace.py", "tests"]
+addopts = "-ra"

@@ -4,4 +4,6 @@ __pycache__/
 venv/
 out.jsonl
 *.jsonl
+!eval/holdout.jsonl
 .DS_Store
+.pytest_cache/

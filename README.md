@@ -29,3 +29,23 @@ python failtrace.py --task "Add a test for login" --tool read_file --args '{"pat
 | timeout | tool timed out |
 
 Add a new preset in `presets.py`. Do not invent a new schema until the old one fills.
+
+## Eval harness
+
+Holdout is frozen in `eval/holdout.jsonl`. Do not regenerate it with a new seed after you start comparing models.
+
+```bash
+python eval/freeze.py
+python harness.py --mode gold
+python harness.py --mode same
+python harness.py --mode model --url http://127.0.0.1:1234/v1/chat/completions --model local
+python -m pytest -q
+```
+
+`--mode model` only sends the task + failed tool + error. The model must reply:
+
+```
+DIAGNOSIS: ...
+TOOL: list_dir
+ARGS: {"path": "."}
+```

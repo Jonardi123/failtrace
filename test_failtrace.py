@@ -235,5 +235,54 @@ class CliTests(unittest.TestCase):
                 assert_valid_v1(self, row)
 
 
+class VarietyTests(unittest.TestCase):
+    COUNT = 20
+
+    def test_count_20_is_not_cloned_rows(self) -> None:
+        for name, factory in PRESETS.items():
+            with self.subTest(preset=name):
+                rows = [factory(i) for i in range(self.COUNT)]
+                self.assertEqual(len(rows), self.COUNT)
+                ids = [row["id"] for row in rows]
+                self.assertEqual(len(set(ids)), self.COUNT)
+                bodies = []
+                for row in rows:
+                    assert_valid_v1(self, row)
+                    body = {k: v for k, v in row.items() if k != "id"}
+                    bodies.append(json.dumps(body, sort_keys=True))
+                self.assertEqual(len(set(bodies)), self.COUNT, f"{name} repeated whole rows")
+
+    def test_index_varies_path_command_error_and_task(self) -> None:
+        for name, factory in PRESETS.items():
+            with self.subTest(preset=name):
+                rows = [factory(i) for i in range(self.COUNT)]
+                tasks = [row["task"] for row in rows]
+                errors = []
+                paths = []
+                commands = []
+                for row in rows:
+                    failed_call, failed_result, _, _ = failed_and_recovered(row)
+                    errors.append(failed_result["error"]["message"])
+                    args = failed_call["arguments"]
+                    if "path" in args:
+                        paths.append(args["path"])
+                    if "command" in args:
+                        commands.append(args["command"])
+                self.assertEqual(len(set(tasks)), self.COUNT, f"{name} cloned task")
+                self.assertEqual(len(set(errors)), self.COUNT, f"{name} cloned error")
+                if paths:
+                    self.assertEqual(len(set(paths)), self.COUNT, f"{name} cloned path")
+                if commands:
+                    self.assertEqual(len(set(commands)), self.COUNT, f"{name} cloned command")
+
+    def test_cli_count_20_unique(self) -> None:
+        result = cli("--preset", "missing_file", "--count", "20")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rows = parse_jsonl(result.stdout)
+        self.assertEqual(len(rows), 20)
+        self.assertEqual(len({row["id"] for row in rows}), 20)
+        self.assertEqual(len({row["task"] for row in rows}), 20)
+
+
 if __name__ == "__main__":
     unittest.main()

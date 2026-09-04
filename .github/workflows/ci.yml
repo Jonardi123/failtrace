@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: python -m pip install -e ".[test]"
+      - name: Tests
+        run: python -m pytest -q
+      - name: Smoke test CLIs
+        run: |
+          failtrace --mix 30 --seed 1 -o /tmp/failtrace.jsonl
+          failtrace-validate /tmp/failtrace.jsonl
+          failtrace-sftpack /tmp/failtrace.jsonl -o /tmp/failtrace-sft.jsonl
+          failtrace-harness --mode gold
+          failtrace-harness --mode same

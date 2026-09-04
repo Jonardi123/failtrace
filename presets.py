@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from schema import example
+from notool_preset import notool
 
 
 def _pick(seq, i: int):
@@ -463,4 +464,5 @@ PRESETS = {
     "permission": permission,
     "partial": partial,
     "timeout": timeout,
+    "notool": notool,
 }

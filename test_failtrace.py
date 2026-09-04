@@ -316,11 +316,12 @@ class MixTests(unittest.TestCase):
     def test_mix_writes_jsonl_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "mix.jsonl"
-            result = cli("--mix", "8", "-o", str(path))
+            n = len(PRESETS)
+            result = cli("--mix", str(n), "-o", str(path))
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertTrue(path.exists())
             rows = parse_jsonl(path.read_text(encoding="utf-8"))
-            self.assertEqual(len(rows), 8)
+            self.assertEqual(len(rows), n)
             self.assertEqual({row["category"] for row in rows}, set(PRESETS))
             for row in rows:
                 assert_valid_v1(self, row)

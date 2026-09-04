@@ -60,3 +60,14 @@ def test_gold_recovery_differs_from_fail():
         ft, fa, _ = failed_call(row)
         rt, ra = gold_recovery(row)
         assert (rt, ra) != (ft, fa), row["id"]
+
+
+def test_notool_score_allows_reply_or_none():
+    from presets import PRESETS
+
+    row = PRESETS["notool"](0)
+    assert score(row, {"tool": "reply", "arguments": {"text": "ENOENT means missing"}, "diagnosis": "text", "raw": ""})["ok"]
+    assert score(row, {"tool": "", "arguments": {}, "diagnosis": "answer in text", "raw": "none"})["ok"]
+    for tool in ("read_file", "write_file", "run_command", "search_code"):
+        pred = {"tool": tool, "arguments": {"path": ".", "query": "x", "command": "ls"}, "diagnosis": "look it up", "raw": ""}
+        assert score(row, pred)["ok"] is False, tool

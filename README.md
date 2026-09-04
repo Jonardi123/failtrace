@@ -51,3 +51,12 @@ DIAGNOSIS: ...
 TOOL: list_dir
 ARGS: {"path": "."}
 ```
+
+## SFT pack
+
+Same prompt as the harness. Assistant target is the gold recovery in that exact format.
+
+```bash
+python sftpack.py --mix 200 --seed 7 -o data/recovery_sft_200.jsonl
+python sftpack.py data/recovery_200.jsonl -o data/recovery_sft_200.jsonl
+```

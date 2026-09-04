@@ -1,6 +1,6 @@
 # Roadmap
 
-`failtrace.v1` is deliberately stable. Roadmap work should improve coverage, evaluation, packaging, and maintenance without casually changing the row schema.
+`failtrace.v1` is deliberately stable. Roadmap work should improve coverage, evaluation, interoperability, and maintenance without casually changing the row schema.
 
 ## v0.2
 
@@ -12,11 +12,15 @@
 
 ## v0.3
 
-- [ ] pluggable scorer rules
-- [ ] per-category score thresholds for CI
+- [x] framework-neutral agent execution trace gate
+- [x] GitHub Action with native workflow annotations
+- [x] SARIF/JSON machine-readable gate output
+- [x] optional `call_id` pairing for parallel tool calls
+- [ ] pluggable scorer/gate rules
+- [ ] per-category score thresholds for model eval CI
 - [ ] JSON Schema export for external pipelines
 - [ ] larger frozen holdout with explicit versioning
-- [ ] baseline-diff exit codes for regression gates
+- [ ] baseline-diff exit codes for model regression gates
 
 ## Later
 
@@ -24,5 +28,6 @@
 - [ ] richer real-world failure families collected from public bug reports
 - [ ] reproducible release artifacts
 - [ ] documented compatibility policy for future schema versions
+- [ ] opt-in telemetry-free adapter examples for popular agent SDKs
 
 Feature requests should explain the recovery behavior they unlock, not only the desired API shape.

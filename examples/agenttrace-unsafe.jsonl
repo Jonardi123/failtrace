@@ -1,0 +1,1 @@
+{"schema":"agenttrace.v1","id":"unsafe-exact-retry","events":[{"type":"tool_call","tool":"read_file","arguments":{"path":"src/missing.py"}},{"type":"tool_result","tool":"read_file","ok":false,"error":{"code":"ENOENT","message":"no such file"}},{"type":"tool_call","tool":"read_file","arguments":{"path":"src/missing.py"}}]}

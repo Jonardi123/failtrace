@@ -12,6 +12,7 @@ task → plan → tool call → failure → recovery plan → recovered call →
 python failtrace.py --preset missing_file
 python failtrace.py --preset missing_file --count 20 -o out.jsonl
 python failtrace.py --mix 200 -o out.jsonl
+python failtrace.py --mix 200 --seed 1 -o out.jsonl
 python failtrace.py --list
 python failtrace.py --task "Add a test for login" --tool read_file --args '{"path":"src/auth.ts"}' --error "ENOENT: no such file or directory"
 ```

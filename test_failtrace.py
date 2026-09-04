@@ -330,5 +330,45 @@ class MixTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
 
 
+class SeedTests(unittest.TestCase):
+    def test_seed_makes_mix_reproducible(self) -> None:
+        a = cli("--mix", "24", "--seed", "7")
+        b = cli("--mix", "24", "--seed", "7")
+        self.assertEqual(a.returncode, 0, a.stderr)
+        self.assertEqual(b.returncode, 0, b.stderr)
+        self.assertEqual(a.stdout, b.stdout)
+        self.assertEqual(len(parse_jsonl(a.stdout)), 24)
+
+    def test_different_seeds_change_order(self) -> None:
+        a = cli("--mix", "24", "--seed", "7")
+        b = cli("--mix", "24", "--seed", "8")
+        self.assertEqual(a.returncode, 0, a.stderr)
+        self.assertEqual(b.returncode, 0, b.stderr)
+        self.assertNotEqual(a.stdout, b.stdout)
+        ids_a = [row["id"] for row in parse_jsonl(a.stdout)]
+        ids_b = [row["id"] for row in parse_jsonl(b.stdout)]
+        self.assertEqual(sorted(ids_a), sorted(ids_b))
+
+    def test_seed_without_mix_exits(self) -> None:
+        result = cli("--preset", "timeout", "--seed", "1")
+        self.assertEqual(result.returncode, 2)
+
+    def test_seeded_mix_200_is_valid_and_unique(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "train.jsonl"
+            result = cli("--mix", "200", "--seed", "1", "-o", str(path))
+            self.assertEqual(result.returncode, 0, result.stderr)
+            rows = parse_jsonl(path.read_text(encoding="utf-8"))
+            self.assertEqual(len(rows), 200)
+            self.assertEqual(len({row["id"] for row in rows}), 200)
+            counts: dict[str, int] = {}
+            for row in rows:
+                assert_valid_v1(self, row)
+                counts[row["category"]] = counts.get(row["category"], 0) + 1
+            self.assertEqual(set(counts), set(PRESETS))
+            values = list(counts.values())
+            self.assertLessEqual(max(values) - min(values), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

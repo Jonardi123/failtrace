@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import random
 import sys
 from pathlib import Path
 
@@ -18,6 +19,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--list", action="store_true", help="List presets")
     p.add_argument("--count", type=int, default=1, help="How many examples to emit")
     p.add_argument("--mix", type=int, metavar="N", help="Emit N examples balanced across all presets")
+    p.add_argument("--seed", type=int, help="RNG seed so --mix is reproducible")
     p.add_argument("-o", "--out", help="Write JSONL here instead of stdout")
     p.add_argument("--task", help="Custom task text")
     p.add_argument("--tool", help="Failed tool name")
@@ -27,18 +29,21 @@ def parse_args() -> argparse.Namespace:
     return p.parse_args()
 
 
-def mix_examples(n: int) -> list[dict]:
+def mix_examples(n: int, seed: int | None = None) -> list[dict]:
     if n < 1:
         raise SystemExit("--mix must be >= 1")
     names = sorted(PRESETS)
+    bag = [names[i % len(names)] for i in range(n)]
+    random.Random(seed).shuffle(bag)
+    counters = {name: 0 for name in names}
     rows: list[dict] = []
     seen: set[str] = set()
-    for i in range(n):
-        name = names[i % len(names)]
-        row = PRESETS[name](i // len(names))
+    for name in bag:
+        row = PRESETS[name](counters[name])
+        counters[name] += 1
         if row["id"] in seen:
             row = dict(row)
-            row["id"] = f"{row['id']}_{i}"
+            row["id"] = f"{row['id']}_{len(rows)}"
         seen.add(row["id"])
         rows.append(row)
     return rows
@@ -82,7 +87,10 @@ def main() -> int:
         if args.preset:
             print("use --mix or --preset, not both", file=sys.stderr)
             return 2
-        rows = mix_examples(args.mix)
+        rows = mix_examples(args.mix, seed=args.seed)
+    elif args.seed is not None:
+        print("--seed only applies to --mix", file=sys.stderr)
+        return 2
     elif args.preset:
         factory = PRESETS[args.preset]
         rows = [factory(i) for i in range(args.count)]

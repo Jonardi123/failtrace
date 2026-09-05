@@ -1,0 +1,42 @@
+{
+  "schema": "failtrace.gate.v1",
+  "runs_checked": 12,
+  "finding_count": 3,
+  "summary": {
+    "error": 0,
+    "warning": 3,
+    "note": 0
+  },
+  "findings": [
+    {
+      "rule_id": "FT008",
+      "severity": "warning",
+      "source": "agenttrace.jsonl",
+      "line": 1,
+      "run_id": "R01",
+      "event_index": 49,
+      "message": "the same command returned an identical failure diagnostic three times; intervening activity has not changed that diagnostic",
+      "tool": "run_command"
+    },
+    {
+      "rule_id": "FT008",
+      "severity": "warning",
+      "source": "agenttrace.jsonl",
+      "line": 3,
+      "run_id": "R03",
+      "event_index": 9,
+      "message": "three failed tool results occurred consecutively without a successful recovery",
+      "tool": "run_command"
+    },
+    {
+      "rule_id": "FT008",
+      "severity": "warning",
+      "source": "agenttrace.jsonl",
+      "line": 3,
+      "run_id": "R03",
+      "event_index": 25,
+      "message": "three failed tool results occurred consecutively without a successful recovery",
+      "tool": "run_command"
+    }
+  ]
+}

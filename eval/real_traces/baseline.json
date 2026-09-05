@@ -1,0 +1,32 @@
+{
+  "schema": "failtrace.gate.v1",
+  "runs_checked": 12,
+  "finding_count": 2,
+  "summary": {
+    "error": 0,
+    "warning": 2,
+    "note": 0
+  },
+  "findings": [
+    {
+      "rule_id": "FT008",
+      "severity": "warning",
+      "source": "agenttrace.jsonl",
+      "line": 3,
+      "run_id": "R03",
+      "event_index": 9,
+      "message": "three failed tool results occurred consecutively without a successful recovery",
+      "tool": "run_command"
+    },
+    {
+      "rule_id": "FT008",
+      "severity": "warning",
+      "source": "agenttrace.jsonl",
+      "line": 3,
+      "run_id": "R03",
+      "event_index": 25,
+      "message": "three failed tool results occurred consecutively without a successful recovery",
+      "tool": "run_command"
+    }
+  ]
+}

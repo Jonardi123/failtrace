@@ -51,7 +51,7 @@ Sequential calls need no identifier. Agents that execute tools in parallel can a
 | `FT005` | warning | missing path is reread before tree/code discovery |
 | `FT006` | error | permission-denied path is touched again |
 | `FT007` | error | command that timed out is repeated unchanged |
-| `FT008` | warning | three failed tool results occur in a row |
+| `FT008` | warning | three consecutive failures, or the same command returns an identical diagnostic three times |
 
 The rules are intentionally narrow. A gate that fires on everything becomes background noise; Failtrace should only block behavior that is straightforward to defend from the trace itself.
 
@@ -105,3 +105,15 @@ conflict result. `FT005` requires successful discovery started after the missing
 path result. Failed or still-pending recovery calls do not clear these findings.
 A late result from a read or discovery started before the failure does not count
 as recovery, even when paired correctly through `call_id`.
+
+`FT008` also tracks repeated failures of an identical shell-tool call across
+successful edits, reads, and other commands. It warns on the third identical,
+non-empty error object and message, once per streak. A successful execution of
+that same call, or a changed/missing diagnostic, resets its streak. All arguments
+(including any working directory or environment) must match. Calls started
+before the preceding failure was observed do not count as recovery attempts.
+
+This warning describes unchanged diagnostic evidence; it does not assert that
+each retry was unjustified. Timing differences, changed diagnostic text, different
+command spellings, and failures hidden by exit-zero pipelines remain outside
+this additional check. See the [real-run audit](../eval/real_traces/REPORT.md).

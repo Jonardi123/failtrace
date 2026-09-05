@@ -98,7 +98,7 @@ The gate currently detects:
 | `FT005` | warning | missing path is reread before project discovery |
 | `FT006` | error | permission-denied path is immediately touched again |
 | `FT007` | error | timed-out command is repeated unchanged |
-| `FT008` | warning | three tool failures occur in a row |
+| `FT008` | warning | three consecutive failures, or three identical diagnostics from the same command despite intervening activity |
 
 Malformed or unreadable traces are `FT000` errors. Parallel tools may use an optional `call_id` on the call and matching result, so out-of-order results remain deterministic.
 
@@ -112,6 +112,14 @@ failtrace-gate traces/*.jsonl --format github
 ```
 
 An unmatched glob fails instead of silently checking zero runs.
+
+### Real-run validation
+
+An initial audit of 12 published mini-SWE-agent runs found two useful warnings
+and one missed repair loop, now covered by a regression. This small, correlated
+sample supports advisory use; it does not establish production accuracy or
+general recovery coverage. See the [audit report](eval/real_traces/REPORT.md) for
+source hashes, manual classifications, limitations, and reproduction commands.
 
 ### GitHub Action
 

@@ -1,0 +1,367 @@
+{
+  "method": "Manual review by the coding assistant: screened all 12 command/result streams and all 58 nonzero outcomes, then inspected full surrounding records for every alert and the missed unchanged-diagnostic loop. Not an independent human panel. No external model grading. The baseline findings and missed loop were inspected before the rule change; annotations were persisted afterward.",
+  "baseline_findings": [
+    {
+      "id": "B1",
+      "run_id": "R03",
+      "rule_id": "FT008",
+      "event_index": 9,
+      "source_message": 11,
+      "classification": "true positive",
+      "reason": "Two invalid sed regex attempts followed by a grep regex error: three command failures and unsuccessful local recovery."
+    },
+    {
+      "id": "B2",
+      "run_id": "R03",
+      "rule_id": "FT008",
+      "event_index": 25,
+      "source_message": 27,
+      "classification": "true positive",
+      "reason": "Two sed delimiter/quoting errors followed by a shell parse error in awk; recovery commands were still failing."
+    }
+  ],
+  "missed_failures": [
+    {
+      "id": "M1",
+      "run_id": "R01",
+      "event_index": 49,
+      "source_message": 51,
+      "classification": "missed failure",
+      "reason": "The same reproduction command returned an identical traceback three times (messages 43, 47, 51). Intervening sed edits succeeded but touched lines 25\u201331 while the diagnostic still identified line 2. The baseline reset FT008 on those zero exits and emitted nothing for the entire run.",
+      "after_rule_id": "FT008",
+      "after_classification": "true positive",
+      "regression_test": "test_r01_identical_diagnostic_survives_successful_edits_and_reads"
+    }
+  ],
+  "ambiguous_or_insufficient_trace_data": [
+    {
+      "id": "U1",
+      "run_ids": [
+        "R01",
+        "R02",
+        "R03",
+        "R04",
+        "R05",
+        "R06",
+        "R07",
+        "R08",
+        "R09",
+        "R10",
+        "R11",
+        "R12"
+      ],
+      "classification": "ambiguous / insufficient trace data",
+      "reason": "Each final submission response has a diff but no exit code; preserve the call and leave its result unscored. Submitted is not a passing-tests verdict."
+    },
+    {
+      "id": "U2",
+      "run_ids": [
+        "R09",
+        "R11"
+      ],
+      "source_messages": [
+        5,
+        7
+      ],
+      "classification": "ambiguous / insufficient trace data",
+      "reason": "Two successful file reads have publisher-truncated output. The middle of the output cannot be audited."
+    },
+    {
+      "id": "U3",
+      "run_ids": [
+        "R04"
+      ],
+      "source_messages": [
+        7
+      ],
+      "classification": "ambiguous / insufficient trace data",
+      "reason": "nl reported a missing file inside a pipeline whose final exit was zero. This proves an inner-command failure but provides no per-process exit status. Subsequent path correction was observed; no bad recovery to count as missed."
+    },
+    {
+      "id": "U4",
+      "run_ids": [
+        "R01",
+        "R05",
+        "R06",
+        "R08"
+      ],
+      "classification": "ambiguous / insufficient trace data",
+      "reason": "Printed reproduction results and caught exceptions are not assertion verdicts. The gate cannot tell expected failures from failed goals using tool status alone."
+    },
+    {
+      "id": "U5",
+      "run_ids": [
+        "R12"
+      ],
+      "source_messages": [
+        39
+      ],
+      "classification": "ambiguous / insufficient trace data",
+      "reason": "Executing a test module directly returned zero without a test-completion summary. Tests actually running is unverified."
+    }
+  ],
+  "per_run_review": [
+    {
+      "run_id": "R01",
+      "calls": 111,
+      "results": 110,
+      "nonzero_results": 35,
+      "all_nonzero_source_messages_reviewed": [
+        27,
+        31,
+        35,
+        39,
+        43,
+        47,
+        51,
+        57,
+        63,
+        69,
+        73,
+        77,
+        81,
+        89,
+        95,
+        101,
+        105,
+        111,
+        113,
+        117,
+        123,
+        129,
+        133,
+        137,
+        141,
+        145,
+        149,
+        153,
+        161,
+        165,
+        171,
+        175,
+        181,
+        187,
+        191
+      ],
+      "additional_evidence_messages": [
+        43,
+        47,
+        51,
+        113,
+        195,
+        219
+      ],
+      "review": "One long missed repair loop; 34 failed reproduction runs plus one malformed sed command. Successful edits repeatedly failed to repair syntax. Identical error at messages 43, 47 and 51 is the conservative regression. A script finally exited zero at message 195; that alone did not mean the original issue was fixed."
+    },
+    {
+      "run_id": "R02",
+      "calls": 12,
+      "results": 11,
+      "nonzero_results": 1,
+      "all_nonzero_source_messages_reviewed": [
+        7
+      ],
+      "additional_evidence_messages": [
+        7,
+        9
+      ],
+      "review": "grep returned no matches in core.py; recursive search then found the class. No repeated failing search. Kept the exit-1 result as recorded."
+    },
+    {
+      "run_id": "R03",
+      "calls": 16,
+      "results": 15,
+      "nonzero_results": 8,
+      "all_nonzero_source_messages_reviewed": [
+        7,
+        9,
+        11,
+        13,
+        17,
+        23,
+        25,
+        27
+      ],
+      "additional_evidence_messages": [
+        7,
+        9,
+        11,
+        13,
+        17,
+        23,
+        25,
+        27,
+        29
+      ],
+      "review": "Two useful warning-level failed-recovery streaks: invalid regex in two sed attempts plus grep; later two invalid sed delimiters followed by malformed awk quoting. An intervening no-match grep and isolated additional sed failure do not establish an additional three-error streak."
+    },
+    {
+      "run_id": "R04",
+      "calls": 22,
+      "results": 21,
+      "nonzero_results": 2,
+      "all_nonzero_source_messages_reviewed": [
+        17,
+        39
+      ],
+      "additional_evidence_messages": [
+        7,
+        9,
+        35,
+        37,
+        39,
+        41,
+        43
+      ],
+      "review": "A missing-file read was hidden by a successful head pipeline. The next command used the correct source file. Later a no-op sed edit was exposed by reading the file and a no-match marker grep, followed by a different awk edit. These are observable limitations of exit status, not evidence that the agent repeated the missing-path failure."
+    },
+    {
+      "run_id": "R05",
+      "calls": 8,
+      "results": 7,
+      "nonzero_results": 0,
+      "all_nonzero_source_messages_reviewed": [],
+      "additional_evidence_messages": [
+        15
+      ],
+      "review": "No nonzero command result. A reproduction script printed actual and expected results. There is no machine-readable assertion verdict or complete task test suite in this record."
+    },
+    {
+      "run_id": "R06",
+      "calls": 27,
+      "results": 26,
+      "nonzero_results": 0,
+      "all_nonzero_source_messages_reviewed": [],
+      "additional_evidence_messages": [
+        17,
+        23,
+        33,
+        41,
+        47,
+        53
+      ],
+      "review": "Several edits left the printed symbolic evalf result unchanged while all shell exits were zero. A later output became numeric. That is useful task-specific evidence for a reviewer, but the gate has no expected-output contract and must not fabricate tool failures from arbitrary stdout."
+    },
+    {
+      "run_id": "R07",
+      "calls": 22,
+      "results": 21,
+      "nonzero_results": 1,
+      "all_nonzero_source_messages_reviewed": [
+        11
+      ],
+      "additional_evidence_messages": [
+        11,
+        13,
+        35
+      ],
+      "review": "An absolute script path was missing; the agent changed to the correct relative command and subsequently ran the existing separability tests successfully. No repeated bad recovery observed."
+    },
+    {
+      "run_id": "R08",
+      "calls": 13,
+      "results": 12,
+      "nonzero_results": 0,
+      "all_nonzero_source_messages_reviewed": [],
+      "additional_evidence_messages": [
+        11,
+        19
+      ],
+      "review": "All commands returned zero. Captured examples include intentional caught exceptions; their presence in output does not automatically mean a failed tool. No gate finding."
+    },
+    {
+      "run_id": "R09",
+      "calls": 22,
+      "results": 21,
+      "nonzero_results": 2,
+      "all_nonzero_source_messages_reviewed": [
+        13,
+        17
+      ],
+      "additional_evidence_messages": [
+        5,
+        13,
+        15,
+        17,
+        19,
+        21
+      ],
+      "review": "A generated script hit Python syntax then encoding errors; each was followed by a file rewrite and ultimately a successful invocation. No three identical diagnoses or consecutive errors. The earlier source-file read was truncated."
+    },
+    {
+      "run_id": "R10",
+      "calls": 66,
+      "results": 65,
+      "nonzero_results": 7,
+      "all_nonzero_source_messages_reviewed": [
+        25,
+        37,
+        97,
+        113,
+        117,
+        119,
+        127
+      ],
+      "additional_evidence_messages": [
+        25,
+        37,
+        41,
+        97,
+        101,
+        113,
+        117,
+        119,
+        121,
+        123,
+        127,
+        131
+      ],
+      "review": "No-match search, reproduction database error, script encoding errors, missing pytest, wrong test-module import, and SQLite test setup error. The agent changed the attempted action after each; native Django tests eventually ran. Repeated encoding mistakes across different scripts show broader agent quality problems, but do not establish an exact-command loop under these rules."
+    },
+    {
+      "run_id": "R11",
+      "calls": 21,
+      "results": 20,
+      "nonzero_results": 1,
+      "all_nonzero_source_messages_reviewed": [
+        31
+      ],
+      "additional_evidence_messages": [
+        7,
+        31,
+        33
+      ],
+      "review": "pytest was absent; the agent switched to SymPy's native test runner. Source-file output was truncated earlier. No repeated missing-runner call observed."
+    },
+    {
+      "run_id": "R12",
+      "calls": 26,
+      "results": 25,
+      "nonzero_results": 1,
+      "all_nonzero_source_messages_reviewed": [
+        37
+      ],
+      "additional_evidence_messages": [
+        37,
+        39,
+        45,
+        49,
+        51
+      ],
+      "review": "pytest was absent; running the test module directly then returned zero with only warnings. This record does not supply a test-completion verdict for that command. Subsequent hand-written checks ran; the gate cannot certify test execution or task completion."
+    }
+  ],
+  "false_positive_count": 0,
+  "baseline_false_alert_fraction": {
+    "numerator": 0,
+    "denominator": 2,
+    "percent": 0
+  },
+  "after_false_alert_fraction": {
+    "numerator": 0,
+    "denominator": 3,
+    "percent": 0
+  },
+  "population_false_positive_rate": null,
+  "population_false_positive_rate_reason": "No representative sampling or complete labeled set of negative decision opportunities; FP/(TP+FP) here is only the observed false-alert fraction. Paired tasks are correlated; the third alert was tuned on this same sample."
+}

@@ -1,0 +1,104 @@
+{
+  "selection": "First two lexicographic task IDs per project (Astropy, Django, SymPy) per model; chosen before linting; no exclusions based on gate results.",
+  "metadata_commit": "40f164d5b8f1d249bf95a6df8b74b577fd8e519d",
+  "baseline_commit": "b3a424575366abed018d19c7f1541de5c2eb7709",
+  "sources": [
+    {
+      "model": "20250726_mini-v1.0.0_gpt-4.1-2025-04-14",
+      "url": "https://swe-bench-submissions.s3.amazonaws.com/bash-only/20250726_mini-v1.0.0_gpt-4.1-2025-04-14/trajs/astropy__astropy-12907/astropy__astropy-12907.traj.json",
+      "instance_id": "astropy__astropy-12907",
+      "etag": "\"f470df99500cdb1a40d60f68a07957c9\"",
+      "sha256": "dc0cfec7c0fa9c959c93b4aa1bd8da27f52a1af90d35829c9eca927b7daa12f5",
+      "id": "R01"
+    },
+    {
+      "model": "20250726_mini-v1.0.0_gpt-4.1-2025-04-14",
+      "url": "https://swe-bench-submissions.s3.amazonaws.com/bash-only/20250726_mini-v1.0.0_gpt-4.1-2025-04-14/trajs/astropy__astropy-13033/astropy__astropy-13033.traj.json",
+      "instance_id": "astropy__astropy-13033",
+      "etag": "\"034915da161f743102653c0d56ae90a0\"",
+      "sha256": "2e141db410ee0a90e58f282b4e19a3ee26cb9294529c5f60f3e6c3c3d0b98c30",
+      "id": "R02"
+    },
+    {
+      "model": "20250726_mini-v1.0.0_gpt-4.1-2025-04-14",
+      "url": "https://swe-bench-submissions.s3.amazonaws.com/bash-only/20250726_mini-v1.0.0_gpt-4.1-2025-04-14/trajs/django__django-10097/django__django-10097.traj.json",
+      "instance_id": "django__django-10097",
+      "etag": "\"c131f4178d661da9d3dcc02ac6d2aa29\"",
+      "sha256": "cf8842fd6e8eb57389bf577aa08ac16476e780a67e688d42745809cf1d876ab7",
+      "id": "R03"
+    },
+    {
+      "model": "20250726_mini-v1.0.0_gpt-4.1-2025-04-14",
+      "url": "https://swe-bench-submissions.s3.amazonaws.com/bash-only/20250726_mini-v1.0.0_gpt-4.1-2025-04-14/trajs/django__django-10554/django__django-10554.traj.json",
+      "instance_id": "django__django-10554",
+      "etag": "\"ccb3cf6605b59c6e43d69eb31b3213e9\"",
+      "sha256": "0328ae6add0ea5184f060cc15d58e35360a9b12c28ed8f9c67439237aac582b3",
+      "id": "R04"
+    },
+    {
+      "model": "20250726_mini-v1.0.0_gpt-4.1-2025-04-14",
+      "url": "https://swe-bench-submissions.s3.amazonaws.com/bash-only/20250726_mini-v1.0.0_gpt-4.1-2025-04-14/trajs/sympy__sympy-11618/sympy__sympy-11618.traj.json",
+      "instance_id": "sympy__sympy-11618",
+      "etag": "\"1ee14698b1692d6ef52c9650df8fbfb5\"",
+      "sha256": "30221a69813f8e1814aa459276190909c0d91418dbe5242eb7190314a8d386dc",
+      "id": "R05"
+    },
+    {
+      "model": "20250726_mini-v1.0.0_gpt-4.1-2025-04-14",
+      "url": "https://swe-bench-submissions.s3.amazonaws.com/bash-only/20250726_mini-v1.0.0_gpt-4.1-2025-04-14/trajs/sympy__sympy-12096/sympy__sympy-12096.traj.json",
+      "instance_id": "sympy__sympy-12096",
+      "etag": "\"8c53110e094b8fef3744788b02cd990e\"",
+      "sha256": "59168aa49f6138e93a7693b117c288e843003e88e47a8e4021ca28b6a23ae57f",
+      "id": "R06"
+    },
+    {
+      "model": "20250726_mini-v1.0.0_claude-sonnet-4-20250514",
+      "url": "https://swe-bench-submissions.s3.amazonaws.com/bash-only/20250726_mini-v1.0.0_claude-sonnet-4-20250514/trajs/astropy__astropy-12907/astropy__astropy-12907.traj.json",
+      "instance_id": "astropy__astropy-12907",
+      "etag": "\"24a2bba1b31ea39c6c350d479c2b6d70\"",
+      "sha256": "40be67260e739d6357c5681a1c9b9f7677b26f09ac29cb1ecca417adff14df72",
+      "id": "R07"
+    },
+    {
+      "model": "20250726_mini-v1.0.0_claude-sonnet-4-20250514",
+      "url": "https://swe-bench-submissions.s3.amazonaws.com/bash-only/20250726_mini-v1.0.0_claude-sonnet-4-20250514/trajs/astropy__astropy-13033/astropy__astropy-13033.traj.json",
+      "instance_id": "astropy__astropy-13033",
+      "etag": "\"608793c7fba56b079fad330d651f12c7\"",
+      "sha256": "27e7d7e23546b147ef95e4c7757aa9e4d1aac737617a5e144cd031e64016786b",
+      "id": "R08"
+    },
+    {
+      "model": "20250726_mini-v1.0.0_claude-sonnet-4-20250514",
+      "url": "https://swe-bench-submissions.s3.amazonaws.com/bash-only/20250726_mini-v1.0.0_claude-sonnet-4-20250514/trajs/django__django-10097/django__django-10097.traj.json",
+      "instance_id": "django__django-10097",
+      "etag": "\"f8fc013577700daaefd4e9c721350d67\"",
+      "sha256": "c433ad35845f24607afd9910b8c01ef35d06a622cc74bc0027785357a575e604",
+      "id": "R09"
+    },
+    {
+      "model": "20250726_mini-v1.0.0_claude-sonnet-4-20250514",
+      "url": "https://swe-bench-submissions.s3.amazonaws.com/bash-only/20250726_mini-v1.0.0_claude-sonnet-4-20250514/trajs/django__django-10554/django__django-10554.traj.json",
+      "instance_id": "django__django-10554",
+      "etag": "\"ab2d9189413fafda195bdb2ed93ae801\"",
+      "sha256": "dc6f799b589901eaca8e874cd440895951654fa07d136f9fd8701a63d50b288a",
+      "id": "R10"
+    },
+    {
+      "model": "20250726_mini-v1.0.0_claude-sonnet-4-20250514",
+      "url": "https://swe-bench-submissions.s3.amazonaws.com/bash-only/20250726_mini-v1.0.0_claude-sonnet-4-20250514/trajs/sympy__sympy-11618/sympy__sympy-11618.traj.json",
+      "instance_id": "sympy__sympy-11618",
+      "etag": "\"126d7531b73b8bfc12bc4c8f97ab4314\"",
+      "sha256": "f1eea50d268ff72d3f9b3b5987bd55e28ac2d153e1770cc863b46e7d253fa16c",
+      "id": "R11"
+    },
+    {
+      "model": "20250726_mini-v1.0.0_claude-sonnet-4-20250514",
+      "url": "https://swe-bench-submissions.s3.amazonaws.com/bash-only/20250726_mini-v1.0.0_claude-sonnet-4-20250514/trajs/sympy__sympy-12096/sympy__sympy-12096.traj.json",
+      "instance_id": "sympy__sympy-12096",
+      "etag": "\"375924546592d0a854221b080675dcb9\"",
+      "sha256": "e539196795de54e2a3587175063665cacf5e9030beade036dbdddabc7e23ffb4",
+      "id": "R12"
+    }
+  ],
+  "normalized_sha256": "bfc11694401d9c58dd4349e6b1489436ae1397f51d739ce94b40cf4489e1e978"
+}

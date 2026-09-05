@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 from gate_schema import (
     DISCOVERY_TOOLS,
     READ_TOOLS,
@@ -66,7 +68,7 @@ RULES: dict[str, dict[str, str]] = {
     "FT008": {
         "severity": "warning",
         "title": "Repeated failure loop",
-        "description": "The trace contains at least three failed tool results in a row without a success.",
+        "description": "Three tool results failed consecutively, or the same command returned an identical diagnostic three times despite intervening activity.",
     },
 }
 
@@ -84,6 +86,11 @@ def lint_events(
     last_failure: CallContext | None = None
     had_failure = False
     consecutive_failures = 0
+    # A successful edit/read does not prove that a previously failing check is
+    # fixed. Retain its last diagnostic until that exact call succeeds or its
+    # diagnostic changes. This is observational warning evidence, not a claim
+    # that every retry was unjustified.
+    command_failures: dict[str, tuple[dict, int, int]] = {}
 
     pending_conflicts: dict[str, int] = {}
     pending_missing: dict[str, int] = {}
@@ -239,8 +246,18 @@ def lint_events(
             continue
 
         context = match_result(event, event_index)
+        command_key = None
+        if context is not None and tool_name(context.tool) in RUN_TOOLS:
+            if command_of(context.arguments):
+                command_key = json.dumps(
+                    [tool_name(context.tool), context.arguments], sort_keys=True, default=str
+                )
         if event.ok is True:
             consecutive_failures = 0
+            if command_key is not None:
+                previous = command_failures.get(command_key)
+                if previous is None or context.event_index > previous[2]:
+                    command_failures.pop(command_key, None)
             if context is not None:
                 context_tool = tool_name(context.tool)
                 path = path_of(context.arguments)
@@ -270,6 +287,29 @@ def lint_events(
                 "three failed tool results occurred consecutively without a successful recovery",
                 event.tool,
             )
+
+        if command_key is not None:
+            previous_error, count, previous_result = command_failures.get(command_key, (None, 0, -1))
+            diagnostic = (event.error or {}).get("message") or (event.error or {}).get("error")
+            if context.event_index <= previous_result:
+                # Concurrent calls started before this failure was observed are
+                # not recovery attempts and cannot resolve or extend its streak.
+                pass
+            elif isinstance(diagnostic, str) and diagnostic.strip():
+                count = count + 1 if previous_error == event.error else 1
+                command_failures[command_key] = (event.error.copy(), count, event_index)
+                if count == 3 and consecutive_failures != 3:
+                    add(
+                        "FT008",
+                        event_index,
+                        "the same command returned an identical failure diagnostic three times; "
+                        "intervening activity has not changed that diagnostic",
+                        event.tool,
+                    )
+            else:
+                # Empty output (e.g. grep with no matches) supplies no diagnostic
+                # evidence for the additional repeated-command check.
+                command_failures.pop(command_key, None)
 
         if context is None:
             continue

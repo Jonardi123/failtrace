@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Audit 12 published mini-SWE-agent runs with pinned source hashes, conversion tooling, and per-finding reviews.
+- Extend FT008 to warn when an identical command returns the same diagnostic three times across intervening activity; successful edits alone no longer hide that pattern.
 - Keep missing-path warnings until discovery succeeds.
 - Require conflict rereads and discovery to start after the failure they resolve, including parallel calls.
 

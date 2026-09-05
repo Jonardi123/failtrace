@@ -85,8 +85,8 @@ def lint_events(
     had_failure = False
     consecutive_failures = 0
 
-    pending_conflicts: set[str] = set()
-    pending_missing: set[str] = set()
+    pending_conflicts: dict[str, int] = {}
+    pending_missing: dict[str, int] = {}
     pending_permission: set[str] = set()
     pending_timeouts: set[str] = set()
 
@@ -189,9 +189,6 @@ def lint_events(
                         event.tool,
                     )
 
-            if tool in DISCOVERY_TOOLS:
-                pending_missing.clear()
-
             if tool in READ_TOOLS and path:
                 if path in pending_missing:
                     add(
@@ -249,7 +246,12 @@ def lint_events(
                 path = path_of(context.arguments)
                 command = command_of(context.arguments)
                 if context_tool in READ_TOOLS and path:
-                    pending_conflicts.discard(path)
+                    if context.event_index > pending_conflicts.get(path, event_index):
+                        pending_conflicts.pop(path, None)
+                if context_tool in DISCOVERY_TOOLS:
+                    for missing_path, failure_index in list(pending_missing.items()):
+                        if context.event_index > failure_index:
+                            pending_missing.pop(missing_path)
                 if context_tool in RUN_TOOLS and command and command not in pending_timeouts:
                     pending_timeouts.clear()
                 if context_tool in WRITE_TOOLS:
@@ -276,9 +278,9 @@ def lint_events(
         path = path_of(context.arguments)
         command = command_of(context.arguments)
         if path and is_conflict(event.error):
-            pending_conflicts.add(path)
+            pending_conflicts[path] = event_index
         if path and is_missing(event.error):
-            pending_missing.add(path)
+            pending_missing[path] = event_index
         if path and is_permission(event.error):
             pending_permission.add(path)
         if command and is_timeout(event.error):

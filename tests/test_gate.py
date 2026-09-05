@@ -210,3 +210,45 @@ def test_parallel_calls_without_call_id_are_reported_as_malformed():
         ]
     )
     assert "FT000" in ids(findings_for(row))
+
+
+
+def test_failed_discovery_does_not_clear_missing_path():
+    events = [
+        {"type": "tool_call", "tool": "read_file", "arguments": {"path": "x"}},
+        {"type": "tool_result", "tool": "read_file", "ok": False, "error": {"code": "ENOENT"}},
+        {"type": "tool_call", "tool": "list_dir", "arguments": {"path": "."}},
+        {"type": "tool_result", "tool": "list_dir", "ok": False, "error": {"code": "EACCES"}},
+        {"type": "tool_call", "tool": "read_file", "arguments": {"path": "x"}},
+    ]
+    assert "FT005" in ids(findings_for(run(events)))
+    events[3] = {"type": "tool_result", "tool": "list_dir", "ok": True}
+    assert "FT005" not in ids(findings_for(run(events)))
+
+
+def test_pending_discovery_does_not_clear_missing_path():
+    events = [
+        {"type": "tool_call", "tool": "read_file", "arguments": {"path": "x"}},
+        {"type": "tool_result", "tool": "read_file", "ok": False, "error": {"code": "ENOENT"}},
+        {"type": "tool_call", "call_id": "search", "tool": "list_dir", "arguments": {"path": "."}},
+        {"type": "tool_call", "call_id": "read", "tool": "read_file", "arguments": {"path": "x"}},
+    ]
+    assert "FT005" in ids(findings_for(run(events)))
+
+
+def test_parallel_recovery_started_before_failure_does_not_clear_it():
+    for failed_tool, recovery_tool, error, rule in [
+        ("read_file", "list_dir", "ENOENT", "FT005"),
+        ("write_file", "read_file", "CONFLICT", "FT004"),
+    ]:
+        failure_call = {"type": "tool_call", "call_id": "failure", "tool": failed_tool, "arguments": {"path": "x"}}
+        recovery_call = {"type": "tool_call", "call_id": "recovery", "tool": recovery_tool, "arguments": {"path": "x"}}
+        failure_result = {"type": "tool_result", "call_id": "failure", "tool": failed_tool, "ok": False, "error": {"code": error}}
+        recovery_result = {"type": "tool_result", "call_id": "recovery", "tool": recovery_tool, "ok": True}
+        retry = {"type": "tool_call", "tool": failed_tool, "arguments": {"path": "x"}}
+        assert rule in ids(findings_for(run([
+            failure_call, recovery_call, failure_result, recovery_result, retry,
+        ])))
+        assert rule not in ids(findings_for(run([
+            failure_call, failure_result, recovery_call, recovery_result, retry,
+        ])))

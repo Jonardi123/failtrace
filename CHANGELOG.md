@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Keep missing-path warnings until discovery succeeds.
+- Require conflict rereads and discovery to start after the failure they resolve, including parallel calls.
+
 All notable changes to failtrace are documented here.
 
 ## 0.3.0 - 2026-09-05
@@ -36,3 +41,4 @@ All notable changes to failtrace are documented here.
 - frozen evaluation harness
 - SFT packing
 - `notool` recovery class
+

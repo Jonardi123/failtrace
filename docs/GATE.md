@@ -96,3 +96,12 @@ You do not need to redesign an agent around Failtrace. At the boundary where the
 - result: `type`, `tool`, `ok`, plus `error` when `ok=false`
 
 Keep credentials, prompts, and raw file contents out of the trace unless you have a separate reason to store them. The gate does not need them.
+
+
+### Recovery completion and parallel calls
+
+`FT004` requires a successful read of the conflicted path, started after the
+conflict result. `FT005` requires successful discovery started after the missing
+path result. Failed or still-pending recovery calls do not clear these findings.
+A late result from a read or discovery started before the failure does not count
+as recovery, even when paired correctly through `call_id`.

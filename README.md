@@ -180,7 +180,7 @@ Default output is JSONL, one complete episode per line.
 
 ```bash
 failtrace-validate train.jsonl
-failtrace-validate train.jsonl holdout.jsonl
+failtrace-validate train.jsonl dev.jsonl
 failtrace-validate train.jsonl --json > validation.json
 cat train.jsonl | failtrace-validate -
 ```

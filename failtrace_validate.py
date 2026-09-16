@@ -127,7 +127,7 @@ def validate_row(row: Any) -> list[str]:
     return errors
 
 
-def _rows_from_stream(stream: TextIO, source: str) -> Iterable[tuple[int, Any, str | None]]:
+def _rows_from_stream(stream: TextIO) -> Iterable[tuple[int, Any, str | None]]:
     for line_no, raw in enumerate(stream, 1):
         if not raw.strip():
             continue
@@ -161,7 +161,7 @@ def validate_sources(paths: list[str], max_errors: int = 100) -> tuple[int, list
             close = True
 
         try:
-            for line_no, row, parse_error in _rows_from_stream(stream, source):
+            for line_no, row, parse_error in _rows_from_stream(stream):
                 if parse_error:
                     issues.append(ValidationIssue(source, line_no, None, parse_error))
                 else:

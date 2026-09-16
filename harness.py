@@ -21,11 +21,16 @@ DEFAULT_HOLDOUT = ROOT / "eval" / "holdout.jsonl"
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.is_file():
+        raise SystemExit(f"cannot read {path}; run `python eval/freeze.py` to generate the holdout")
     rows = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if line:
-            rows.append(json.loads(line))
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line:
+                rows.append(json.loads(line))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"invalid JSON in {path}: {exc}") from exc
     if not rows:
         raise SystemExit(f"empty holdout: {path}")
     return rows

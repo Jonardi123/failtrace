@@ -93,7 +93,7 @@ def render_markdown(summary: dict[str, Any], title: str, delta: dict[str, Any] |
     ]
     if delta:
         sign = "+" if delta["pass_rate_delta"] >= 0 else ""
-        lines.append(f" **Baseline delta:** {sign}{delta['pass_rate_delta'] * 100:.1f} pp.")
+        lines.append(f"**Baseline delta:** {sign}{delta['pass_rate_delta'] * 100:.1f} pp.")
     lines += [
         "",
         "| Category | Passed | Pass rate |",

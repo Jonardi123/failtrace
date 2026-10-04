@@ -184,6 +184,10 @@ def validate_sources(paths: list[str], max_errors: int = 100) -> tuple[int, list
                         issues.append(ValidationIssue(source, line_no, row_id, message))
                 if len(issues) >= max_errors:
                     return checked, issues
+        except (UnicodeError, OSError) as exc:
+            issues.append(ValidationIssue(source, 0, None, f"cannot read UTF-8 file: {exc}"))
+            if len(issues) >= max_errors:
+                return checked, issues
         finally:
             if close:
                 stream.close()

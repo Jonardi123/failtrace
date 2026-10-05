@@ -112,6 +112,11 @@ def gate_sources(paths: list[str], max_findings: int = 200) -> tuple[int, list[F
                         findings.extend(lint_events(run_id, events, source=source, line=line_no))
                 if len(findings) >= max_findings:
                     return checked, findings[:max_findings]
+        except (UnicodeError, OSError) as exc:
+            findings.append(Finding(
+                "FT000", "error", source, 0, "<unknown>", 0,
+                f"cannot read UTF-8 trace source: {exc}",
+            ))
         finally:
             if close:
                 stream.close()

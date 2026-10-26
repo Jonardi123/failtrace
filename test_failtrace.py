@@ -220,6 +220,19 @@ class CliTests(unittest.TestCase):
         self.assertEqual(failed_result["error"]["message"], "ENOENT: no such file or directory")
         self.assertNotEqual(failed_call["tool"], recovered_call["tool"])
 
+    def test_custom_rejects_non_object_tool_arguments(self) -> None:
+        for value in ('[]', 'null', '42', '"text"', 'true'):
+            with self.subTest(args=value):
+                result = cli(
+                    "--task", "Inspect a file",
+                    "--tool", "read_file",
+                    "--error", "ENOENT",
+                    "--args", value,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("--args JSON must be an object", result.stderr)
+                self.assertFalse(result.stdout)
+
     def test_custom_missing_fields_exits(self) -> None:
         result = cli("--task", "only a task")
         self.assertNotEqual(result.returncode, 0)

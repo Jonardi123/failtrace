@@ -54,6 +54,8 @@ def from_custom(args: argparse.Namespace) -> dict:
         tool_args = json.loads(args.args)
     except json.JSONDecodeError as exc:
         raise SystemExit(f"invalid --args JSON: {exc}") from exc
+    if not isinstance(tool_args, dict):
+        raise SystemExit("--args JSON must be an object")
     if not args.task or not args.tool or not args.error:
         raise SystemExit("custom mode needs --task --tool --error")
     return example(

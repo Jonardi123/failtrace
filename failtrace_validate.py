@@ -180,7 +180,9 @@ def validate_sources(paths: list[str], max_errors: int = 100) -> tuple[int, list
                             )
                         else:
                             seen_ids[row_id] = (source, line_no)
-                    for message in validate_row(row):
+                    # One malformed row can produce several errors; respect the global cap.
+                    remaining = max_errors - len(issues)
+                    for message in validate_row(row)[:remaining]:
                         issues.append(ValidationIssue(source, line_no, row_id, message))
                 if len(issues) >= max_errors:
                     return checked, issues

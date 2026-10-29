@@ -78,8 +78,14 @@ def path_of(arguments: dict[str, Any]) -> str:
 
 
 def command_of(arguments: dict[str, Any]) -> str:
-    value = arguments.get("command")
-    return str(value) if value is not None else ""
+    """Read shell commands from common string and argv-style tool arguments."""
+    for key in ("command", "cmd", "argv"):
+        value = arguments.get(key)
+        if isinstance(value, str) and value.strip():
+            return value
+        if isinstance(value, list) and value and all(isinstance(arg, str) for arg in value):
+            return " ".join(value)
+    return ""
 
 
 def error_text(error: dict[str, Any] | None) -> str:

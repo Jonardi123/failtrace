@@ -42,7 +42,14 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         category = str(row.get("category") or "unknown")
         grouped[category].append(row.get("ok") is True)
         if row.get("ok") is not True:
-            for reason in row.get("reasons") or ["unspecified failure"]:
+            raw_reasons = row.get("reasons")
+            if isinstance(raw_reasons, str):
+                failure_reasons = [raw_reasons] if raw_reasons else []
+            elif isinstance(raw_reasons, list):
+                failure_reasons = raw_reasons
+            else:
+                failure_reasons = []
+            for reason in failure_reasons or ["unspecified failure"]:
                 reasons[str(reason)] += 1
 
     by_category = {}
